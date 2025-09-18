@@ -1,4 +1,4 @@
-class ChecklistModel{
+class ChecklistModel {
   String companyName;
   DateTime visitDate;
   String position;
@@ -6,7 +6,7 @@ class ChecklistModel{
   String companion;
   String rgf;
 
-  //descrição do ambiente
+  // Descrição do ambiente
   String local;
   String structure;
   String area;
@@ -17,23 +17,22 @@ class ChecklistModel{
   String windows;
   String lighting;
 
-  //avaliação ambiental
+  // Avaliação ambiental
   String department;
   String exposedFunctions;
   int exposedEmployees;
 
-  //riscos
+  // Riscos
   List<Risk> risks;
 
-  //trabalhos especiais
+  // Trabalhos especiais
   bool heightWork;
   bool confinedSpace;
   String observations;
 
-  //assinaturas
+  // Assinaturas
   String technicianSignaturePath;
   String companionSignaturePath;
-
 
   ChecklistModel({
     this.companyName = '',
@@ -41,7 +40,7 @@ class ChecklistModel{
     this.position = '',
     this.evaluator = '',
     this.companion = '',
-    this.rgf  = '',
+    this.rgf = '',
     this.local = '',
     this.structure = '',
     this.area = '',
@@ -54,26 +53,23 @@ class ChecklistModel{
     this.department = '',
     this.exposedFunctions = '',
     this.exposedEmployees = 0,
-    List<Risk> ? risks,
+    List<Risk>? risks,
     this.heightWork = false,
     this.confinedSpace = false,
     this.observations = '',
     this.technicianSignaturePath = '',
-    this.companionSignaturePath = ''
+    this.companionSignaturePath = '',
   }) : visitDate = visitDate ?? DateTime.now(),
-       risks = risks ?? [Risk()];
+        risks = risks ?? [Risk()];
+}
 
-
-
-  }
-
-class Risk{
+class Risk {
   String type;
   String agent;
   String concentration;
   String source;
   String frequency;
-  String severety;
+  String severity;
   String probability;
   String epi;
 
@@ -83,14 +79,8 @@ class Risk{
     this.concentration = '',
     this.source = '',
     this.frequency = '',
-    this.severety = '',
+    this.severity = '',
     this.probability = '',
     this.epi = '',
-
-});
-
-
-
-
-
+  });
 }
