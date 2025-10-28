@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'screens/checklist_form.dart';
 
-void main(){
+void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget{
+class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Checklist de Avaliação Ambiental',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-     // home: ChecklistFormScreen(), //parei aqui
+      home: ChecklistFormScreen(),
       debugShowCheckedModeBanner: false,
     );
-
   }
 }
