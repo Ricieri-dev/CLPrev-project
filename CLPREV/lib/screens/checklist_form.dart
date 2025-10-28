@@ -1,5 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:signature/signature.dart';
+import 'package:printing/printing.dart';
 import '../models/checklist_model.dart';
 import '../services/pdf_service.dart';
 import 'signature_screen.dart';
@@ -14,7 +16,13 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
   final ChecklistModel _checklist = ChecklistModel();
   final List<String> _frequencyOptions = ['Eventual', 'Intermitente', 'Permanente'];
   final List<String> _severityOptions = ['Insignificante', 'Leve', 'Moderado', 'Sério', 'Severo'];
-  final List<String> _probabilityOptions = ['Quase Impossível', 'Improvável', 'Existe Possibilidade', 'Provável', 'Quase Certo'];
+  final List<String> _probabilityOptions = [
+    'Quase Impossível',
+    'Improvável',
+    'Existe Possibilidade',
+    'Provável',
+    'Quase Certo',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +367,7 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
               onSaved: (value) => _checklist.risks[index].source = value!,
             ),
             SizedBox(height: 16),
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Frequência',
                 border: OutlineInputBorder(),
@@ -372,12 +380,17 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
               }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _checklist.risks[index].frequency = '';
+                  _checklist.risks[index].frequency = value ?? '';
                 });
               },
+              value: _checklist.risks[index].frequency.isEmpty
+                  ? null
+                  : _checklist.risks[index].frequency,
+              onSaved: (value) =>
+                  _checklist.risks[index].frequency = value ?? '',
             ),
             SizedBox(height: 16),
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Severidade',
                 border: OutlineInputBorder(),
@@ -390,12 +403,17 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
               }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _checklist.risks[index].severity = '';
+                  _checklist.risks[index].severity = value ?? '';
                 });
               },
+              value: _checklist.risks[index].severity.isEmpty
+                  ? null
+                  : _checklist.risks[index].severity,
+              onSaved: (value) =>
+                  _checklist.risks[index].severity = value ?? '',
             ),
             SizedBox(height: 16),
-            DropdownButtonFormField(
+            DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Probabilidade',
                 border: OutlineInputBorder(),
@@ -408,9 +426,14 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
               }).toList(),
               onChanged: (value) {
                 setState(() {
-                  _checklist.risks[index].probability = '';
+                  _checklist.risks[index].probability = value ?? '';
                 });
               },
+              value: _checklist.risks[index].probability.isEmpty
+                  ? null
+                  : _checklist.risks[index].probability,
+              onSaved: (value) =>
+                  _checklist.risks[index].probability = value ?? '',
             ),
             SizedBox(height: 16),
             TextFormField(
@@ -429,7 +452,7 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
                   });
                 },
                 child: Text('Remover Risco'),
-                style: ElevatedButton.styleFrom(backgroundColor:  Colors.red),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               ),
           ],
         ),
@@ -514,15 +537,16 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
                     children: [
                       Text('Assinatura do Técnico'),
                       SizedBox(height: 8),
-                      _checklist.technicianSignaturePath.isEmpty
+                      _checklist.technicianSignaturePath.isEmpty ||
+                              !File(_checklist.technicianSignaturePath).existsSync()
                           ? ElevatedButton(
-                        onPressed: () => _captureSignature(true),
-                        child: Text('Assinar'),
-                      )
-                          : Image.asset(
-                        _checklist.technicianSignaturePath,
-                        height: 100,
-                      ),
+                              onPressed: () => _captureSignature(true),
+                              child: Text('Assinar'),
+                            )
+                          : Image.file(
+                              File(_checklist.technicianSignaturePath),
+                              height: 100,
+                            ),
                     ],
                   ),
                 ),
@@ -532,15 +556,16 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
                     children: [
                       Text('Assinatura do Acompanhante'),
                       SizedBox(height: 8),
-                      _checklist.companionSignaturePath.isEmpty
+                      _checklist.companionSignaturePath.isEmpty ||
+                              !File(_checklist.companionSignaturePath).existsSync()
                           ? ElevatedButton(
-                        onPressed: () => _captureSignature(false),
-                        child: Text('Assinar'),
-                      )
-                          : Image.asset(
-                        _checklist.companionSignaturePath,
-                        height: 100,
-                      ),
+                              onPressed: () => _captureSignature(false),
+                              child: Text('Assinar'),
+                            )
+                          : Image.file(
+                              File(_checklist.companionSignaturePath),
+                              height: 100,
+                            ),
                     ],
                   ),
                 ),
@@ -590,20 +615,13 @@ class _ChecklistFormScreenState extends State<ChecklistFormScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Gerar PDF
       final pdfService = PDFService();
       final pdfFile = await pdfService.generatePDF(_checklist);
 
-      // Mostrar mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('PDF gerado com sucesso!'),
-          duration: Duration(seconds: 2),
-        ),
+      await Printing.sharePdf(
+        bytes: await pdfFile.readAsBytes(),
+        filename: 'checklist_avaliacao_ambiental.pdf',
       );
-
-      // Aqui você pode compartilhar ou salvar o PDF
-      // Por exemplo: Share.shareFiles([pdfFile.path]);
     }
   }
 }

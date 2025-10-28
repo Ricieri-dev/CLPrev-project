@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:signature/signature.dart';
 
 class SignatureScreen extends StatefulWidget {
@@ -24,16 +28,7 @@ class _SignatureScreenState extends State<SignatureScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.check),
-            onPressed: () {
-              if (_controller.isNotEmpty) {
-                // Retornar a assinatura
-                _controller.toPngBytes().then((bytes) {
-                  // Salvar a assinatura e retornar o caminho
-                  // Este é um exemplo simplificado
-                  Navigator.pop(context, 'assets/signature.png');
-                });
-              }
-            },
+            onPressed: _saveSignature,
           ),
         ],
       ),
@@ -54,17 +49,10 @@ class _SignatureScreenState extends State<SignatureScreen> {
                 ElevatedButton(
                   onPressed: () => _controller.clear(),
                   child: Text('Limpar'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_controller.isNotEmpty) {
-                      _controller.toPngBytes().then((bytes) {
-                        // Salvar a assinatura e retornar o caminho
-                        Navigator.pop(context, 'assets/signature.png');
-                      });
-                    }
-                  },
+                  onPressed: _saveSignature,
                   child: Text('Confirmar'),
                 ),
               ],
@@ -79,5 +67,31 @@ class _SignatureScreenState extends State<SignatureScreen> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveSignature() async {
+    if (_controller.isEmpty) {
+      return;
+    }
+
+    final bytes = await _controller.toPngBytes();
+    if (bytes == null) {
+      return;
+    }
+
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = p.join(
+      directory.path,
+      'signature_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
+
+    final file = File(filePath);
+    await file.writeAsBytes(bytes, flush: true);
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.pop(context, file.path);
   }
 }

@@ -1,10 +1,13 @@
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import '../models/checklist_model.dart';
 
 class PDFService {
-  Future<pw.Document> generatePDF(ChecklistModel checklist) async {
+  Future<File> generatePDF(ChecklistModel checklist) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -38,7 +41,17 @@ class PDFService {
         },
       ),
     );
+    final bytes = await pdf.save();
+    final directory = await getTemporaryDirectory();
+    final file = File(
+      p.join(
+        directory.path,
+        'checklist_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      ),
+    );
 
-    return pdf;
+    await file.writeAsBytes(bytes, flush: true);
+
+    return file;
   }
 }
